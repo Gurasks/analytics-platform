@@ -1,0 +1,30 @@
+{
+  "name": "analytics-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "concurrently --names \"infra,event,worker,gateway,frontend\" --prefix \"[{name}]\" --prefix-colors \"yellow,blue,green,magenta,cyan\" --kill-others-on-fail --hide \"infra\" \"npm run dev:infra\" \"npm run dev:event\" \"npm run dev:worker\" \"npm run dev:gateway\" \"npm run dev:frontend\"",
+
+    "dev:event": "npm --prefix services/event-service run dev",
+    "dev:worker": "npm --prefix services/worker run dev",
+    "dev:gateway": "npm --prefix apps/gateway run dev",
+    "dev:frontend": "npm --prefix apps/frontend run dev",
+    "dev:infra": "docker-compose -f infrastructure/docker/docker-compose.yml up -d",
+    "lint": "eslint ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^10.0.3"
+  }
+}
