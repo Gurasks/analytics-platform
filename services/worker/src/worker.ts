@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { connectDB } from "./db";
-import { EventModel } from "./models/Event";
+import { EventModel } from "@analytics/models";
 
 async function startWorker() {
   await connectDB();
