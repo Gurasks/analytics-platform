@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { Worker } from "bullmq";
 import { connectDB } from "./db";
 import { EventModel } from "@analytics/models";

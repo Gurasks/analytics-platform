@@ -1,11 +1,12 @@
+import "dotenv/config";
 import express from "express";
-import { eventQueue } from "./queue";
-import { EventModel } from "@analytics/models";
 import mongoose from "mongoose";
 import { config } from "./config";
+import eventRoutes from "./routes/event.routes";
 
 const app = express();
 app.use(express.json());
+app.use(eventRoutes);
 
 async function start() {
   await mongoose.connect(config.mongoUrl);
@@ -18,21 +19,3 @@ async function start() {
 }
 
 start();
-
-app.post("/events", async (req, res) => {
-  const event = req.body;
-
-  console.log("📩 [event] received:", event);
-
-  await eventQueue.add("track-event", event);
-
-  res.status(201).json({
-    status: "queued",
-  });
-});
-
-app.get("/events", async (req, res) => {
-  const events = await EventModel.find().sort({ createdAt: -1 });
-
-  res.json(events);
-});
