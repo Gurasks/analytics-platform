@@ -2,6 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 
 import { typeDefs, resolvers } from "./graphql";
+import { config } from "./config";
 
 async function start() {
   console.log("🗄️ [gateway] connected to MongoDB");
@@ -12,7 +13,7 @@ async function start() {
   });
 
   const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+    listen: { port: config.port },
   });
 
   console.log(`🚀 [gateway] → ${url}`);

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export async function connectDB() {
-  await mongoose.connect("mongodb://localhost:27017/analytics");
+  await mongoose.connect(process.env.MONGO_URL!);
 
   console.log("🗄️ [worker] connected to MongoDB");
 }

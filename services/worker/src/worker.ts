@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { connectDB } from "./db";
 import { EventModel } from "@analytics/models";
+import { config } from "./config";
 
 async function startWorker() {
   await connectDB();
@@ -15,8 +16,8 @@ async function startWorker() {
     },
     {
       connection: {
-        host: "localhost",
-        port: 6379,
+        host: config.redisHost,
+        port: config.redisPort,
       },
     },
   );

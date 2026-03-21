@@ -2,17 +2,18 @@ import express from "express";
 import { eventQueue } from "./queue";
 import { EventModel } from "@analytics/models";
 import mongoose from "mongoose";
+import { config } from "./config";
 
 const app = express();
 app.use(express.json());
 
 async function start() {
-  await mongoose.connect("mongodb://localhost:27017/analytics");
+  await mongoose.connect(config.mongoUrl);
 
   console.log("🗄️ [event] connected to MongoDB");
 
-  app.listen(4001, () => {
-    console.log("🚀 [event] → http://localhost:4001");
+  app.listen(config.port, () => {
+    console.log(`🚀 [event] → http://localhost:${config.port}`);
   });
 }
 
@@ -34,8 +35,4 @@ app.get("/events", async (req, res) => {
   const events = await EventModel.find().sort({ createdAt: -1 });
 
   res.json(events);
-});
-
-app.listen(4001, () => {
-  console.log("🚀 [event] → http://localhost:4001");
 });
