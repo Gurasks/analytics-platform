@@ -1,30 +1,20 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { createEvent, getEvents } from "../services/event.service";
-import { createEventSchema } from "../dtos/event.schema";
-import { getEventsSchema } from "@analytics/shared-types";
+import { CreateEventInput, GetEventsQuery } from "@analytics/shared-types";
+import { ValidatedRequest } from "../types/validated-request";
 
-export async function createEventController(req: Request, res: Response) {
-  try {
-    const parsed = createEventSchema.parse(req.body);
-
-    const result = await createEvent(parsed);
-
-    res.status(201).json(result);
-  } catch (error) {
-    console.error("❌ [event] validation failed:", error);
-    res.status(400).json({ error: "Invalid request body" });
-  }
+export async function createEventController(
+  req: ValidatedRequest<CreateEventInput>,
+  res: Response,
+) {
+  const result = await createEvent(req.validated!);
+  res.status(201).json(result);
 }
 
-export async function getEventsController(req: Request, res: Response) {
-  try {
-    const parsed = getEventsSchema.parse(req.query);
-
-    const result = await getEvents(parsed);
-
-    res.json(result);
-  } catch (error) {
-    console.error("❌ [event] validation failed:", error);
-    res.status(400).json({ error: "Invalid query params" });
-  }
+export async function getEventsController(
+  req: ValidatedRequest<GetEventsQuery>,
+  res: Response,
+) {
+  const result = await getEvents(req.validated!);
+  res.json(result);
 }

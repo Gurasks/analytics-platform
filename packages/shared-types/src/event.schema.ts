@@ -1,6 +1,11 @@
 import { z } from "zod";
 import mongoose from "mongoose";
 
+export const createEventSchema = z.object({
+  type: z.string(),
+  userId: z.string(),
+});
+
 export const getEventsSchema = z.object({
   cursor: z
     .string()

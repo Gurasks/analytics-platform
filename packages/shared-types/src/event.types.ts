@@ -1,4 +1,5 @@
 import { z } from "zod";
-import { getEventsSchema } from "./event.schema";
+import { createEventSchema, getEventsSchema } from "./event.schema";
 
 export type GetEventsQuery = z.infer<typeof getEventsSchema>;
+export type CreateEventInput = z.infer<typeof createEventSchema>;

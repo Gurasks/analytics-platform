@@ -1,5 +1,5 @@
 import { EventModel } from "@analytics/models";
-import { GetEventsQuery } from "@analytics/shared-types";
+import { CreateEventInput, GetEventsQuery } from "@analytics/shared-types";
 import { eventQueue } from "../queue";
 import mongoose from "mongoose";
 
@@ -9,11 +9,8 @@ type MongoQuery = {
   userId?: string;
 };
 
-export async function createEvent(event: {}) {
-  console.log("📩 [event] received:", event);
-
+export async function createEvent(event: CreateEventInput) {
   await eventQueue.add("track-event", event);
-
   return { status: "queued" };
 }
 

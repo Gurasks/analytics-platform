@@ -1,4 +1,11 @@
 export const eventTypeDefs = `#graphql
+  input EventQueryInput {
+    cursor: String
+    limit: Int
+    type: String
+    userId: String
+  }
+
   type Event {
     id: ID!
     type: String
@@ -12,11 +19,6 @@ export const eventTypeDefs = `#graphql
   }
 
   extend type Query {
-    events(
-      cursor: String
-      limit: Int
-      type: String
-      userId: String
-    ): EventResponse!
+    events(input: EventQueryInput): EventResponse!
   }
 `;
