@@ -1,9 +1,13 @@
 import { EventModel } from "@analytics/models";
-
+import { GetEventsQuery } from "@analytics/shared-types";
 import { eventQueue } from "../queue";
-import { GetEventsQuery } from "../dtos/event.dto";
+import mongoose from "mongoose";
 
-type Query = Record<string, unknown>;
+type MongoQuery = {
+  _id?: { $lt: mongoose.Types.ObjectId };
+  type?: string;
+  userId?: string;
+};
 
 export async function createEvent(event: {}) {
   console.log("📩 [event] received:", event);
@@ -13,18 +17,32 @@ export async function createEvent(event: {}) {
   return { status: "queued" };
 }
 
-export async function getEvents({ cursor, limit = 10 }: GetEventsQuery) {
-  const parsedLimit = Number(limit) || 10;
+export async function getEvents({
+  cursor,
+  limit,
+  type,
+  userId,
+}: GetEventsQuery) {
+  const parsedLimit = limit ?? 10;
 
-  const query: Query = {};
+  const query: MongoQuery = {};
 
   if (cursor) {
-    query._id = { $lt: cursor };
+    query._id = { $lt: new mongoose.Types.ObjectId(cursor) };
+  }
+
+  if (type) {
+    query.type = type;
+  }
+
+  if (userId) {
+    query.userId = userId;
   }
 
   const data = await EventModel.find(query)
     .sort({ _id: -1 })
-    .limit(parsedLimit);
+    .limit(parsedLimit)
+    .lean();
 
   const nextCursor = data.length ? data[data.length - 1]._id.toString() : null;
 

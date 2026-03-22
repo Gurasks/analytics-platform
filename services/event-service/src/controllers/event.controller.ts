@@ -1,29 +1,30 @@
 import { Request, Response } from "express";
-import { CreateEventBody, GetEventsQuery } from "../dtos/event.dto";
 import { createEvent, getEvents } from "../services/event.service";
+import { createEventSchema } from "../dtos/event.schema";
+import { getEventsSchema } from "@analytics/shared-types";
 
-export async function createEventController(
-  req: Request<{}, {}, CreateEventBody>,
-  res: Response,
-) {
+export async function createEventController(req: Request, res: Response) {
   try {
-    const result = await createEvent(req.body);
+    const parsed = createEventSchema.parse(req.body);
+
+    const result = await createEvent(parsed);
+
     res.status(201).json(result);
   } catch (error) {
-    console.error("❌ [event] create failed:", error);
-    res.status(500).json({ error: "Failed to create event" });
+    console.error("❌ [event] validation failed:", error);
+    res.status(400).json({ error: "Invalid request body" });
   }
 }
 
-export async function getEventsController(
-  req: Request<{}, {}, {}, GetEventsQuery>,
-  res: Response,
-) {
+export async function getEventsController(req: Request, res: Response) {
   try {
-    const result = await getEvents(req.query);
+    const parsed = getEventsSchema.parse(req.query);
+
+    const result = await getEvents(parsed);
+
     res.json(result);
   } catch (error) {
-    console.error("❌ [event] fetch failed:", error);
-    res.status(500).json({ error: "Failed to fetch events" });
+    console.error("❌ [event] validation failed:", error);
+    res.status(400).json({ error: "Invalid query params" });
   }
 }

@@ -7,14 +7,16 @@ export const eventTypeDefs = `#graphql
   }
 
   type EventResponse {
-    data: [Event]
-    pagination: Pagination
+    data: [Event!]!
+    pagination: Pagination!
   }
 
   extend type Query {
     events(
       cursor: String
       limit: Int
-    ): EventResponse
+      type: String
+      userId: String
+    ): EventResponse!
   }
 `;

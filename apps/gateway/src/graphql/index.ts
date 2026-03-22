@@ -1,6 +1,8 @@
-import { baseSchema } from "./schema";
+import { baseTypeDefs } from "./schema/base.schema";
 import { eventModule } from "./modules/event";
 
-export const typeDefs = [baseSchema.typeDefs, eventModule.typeDefs];
+const modules = [eventModule];
 
-export const resolvers = [eventModule.resolvers];
+export const typeDefs = [baseTypeDefs, ...modules.map((m) => m.typeDefs)];
+
+export const resolvers = modules.map((m) => m.resolvers);
