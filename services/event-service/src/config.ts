@@ -1,18 +1,9 @@
 import "dotenv/config";
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-
-  if (!value) {
-    throw new Error(`❌ Missing environment variable: ${name}`);
-  }
-
-  return value;
-}
+import { requireNumberEnv, requireEnv } from "@analytics/shared-infra";
 
 export const config = {
-  port: Number(requireEnv("PORT")),
+  port: requireNumberEnv("PORT"),
   mongoUrl: requireEnv("MONGO_URL"),
   redisHost: requireEnv("REDIS_HOST"),
-  redisPort: Number(requireEnv("REDIS_PORT")),
+  redisPort: requireNumberEnv("REDIS_PORT"),
 };

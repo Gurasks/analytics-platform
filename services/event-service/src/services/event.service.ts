@@ -1,7 +1,7 @@
 import { EventModel } from "@analytics/models";
 import { CreateEventInput, GetEventsQuery } from "@analytics/shared-types";
-import { eventQueue } from "../queue";
 import mongoose from "mongoose";
+import { eventQueue } from "../queue";
 
 type MongoQuery = {
   _id?: { $lt: mongoose.Types.ObjectId };

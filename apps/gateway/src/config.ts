@@ -1,16 +1,8 @@
 import "dotenv/config";
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-
-  if (!value) {
-    throw new Error(`❌ Missing environment variable: ${name}`);
-  }
-
-  return value;
-}
+import { requireNumberEnv, requireEnv } from "@analytics/shared-infra";
 
 export const config = {
-  port: Number(requireEnv("PORT")),
+  port: requireNumberEnv("PORT"),
   eventServiceUrl: requireEnv("EVENT_SERVICE_URL"),
+  analyticsServiceUrl: requireEnv("ANALYTICS_SERVICE_URL"),
 };

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@analytics/shared-infra": ["packages/shared-infra/src"],
+      "@analytics/shared-types": ["packages/shared-types/src"]
+    }
+  }
+}

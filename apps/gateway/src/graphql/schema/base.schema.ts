@@ -3,6 +3,10 @@ export const baseTypeDefs = `#graphql
     _empty: String
   }
 
+  type Mutation {
+    _empty: String
+  }
+
   type Pagination {
     nextCursor: String
     hasMore: Boolean

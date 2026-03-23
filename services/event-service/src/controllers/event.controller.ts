@@ -1,7 +1,7 @@
+import { ValidatedRequest } from "@analytics/shared-infra";
+import { CreateEventInput, GetEventsQuery } from "@analytics/shared-types";
 import { Response } from "express";
 import { createEvent, getEvents } from "../services/event.service";
-import { CreateEventInput, GetEventsQuery } from "@analytics/shared-types";
-import { ValidatedRequest } from "../types/validated-request";
 
 export async function createEventController(
   req: ValidatedRequest<CreateEventInput>,

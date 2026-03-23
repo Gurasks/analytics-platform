@@ -6,6 +6,17 @@ export const createEventSchema = z.object({
   userId: z.string(),
 });
 
+export const trackEventSchema = z.object({
+  type: z.string(),
+  userId: z.string(),
+});
+
+export const eventStatSchema = z.object({
+  from: z.string().optional(),
+  to: z.string().optional(),
+  groupBy: z.enum(["TYPE", "USER", "DAY"]),
+});
+
 export const getEventsSchema = z.object({
   cursor: z
     .string()
