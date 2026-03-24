@@ -8,8 +8,10 @@
   ],
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
-    "dev": "concurrently --parallel --names \"infra,event,analytics,worker,gateway,frontend\" --prefix \"[{name}]\" --prefix-colors \"yellow,blue,cyan,green,magenta,white\" --kill-others-on-fail --hide \"infra\" \"npm run dev:infra\" \"npm run dev:event\" \"npm run dev:analytics\" \"npm run dev:worker\" \"npm run dev:gateway\" \"npm run dev:frontend\"",
+    "dev": "concurrently --parallel --names \"infra,event,analytics,worker,gateway,frontend\" --prefix \"[{name}]\" --prefix-colors \"yellow,blue,cyan,green,magenta,white\" --hide \"infra\" \"npm run dev:infra\" \"npm run dev:event\" \"npm run dev:analytics\" \"npm run dev:worker\" \"npm run dev:gateway\" \"npm run dev:frontend\"",
+    "dev:debug": "concurrently --parallel --names \"event,analytics,worker,gateway\" \"npm run dev:event\" \"npm run dev:analytics\" \"npm run dev:worker\" \"npm run dev:gateway\"",
 
     "dev:event": "npm --prefix services/event-service run dev",
     "dev:analytics": "npm --prefix services/analytics-service run dev",
@@ -18,6 +20,13 @@
     "dev:frontend": "npm --prefix apps/frontend run dev",
     "dev:infra": "docker-compose -f infrastructure/docker/docker-compose.yml up -d",
     "dev:stop": "docker-compose -f infrastructure/docker/docker-compose.yml down",
+    "dev:setup": "node scripts/setup.js",
+    "mongo": "docker compose -f infrastructure/docker/docker-compose.yml exec mongodb mongosh",
+    "redis": "docker compose -f infrastructure/docker/docker-compose.yml exec redis redis-cli",
+    "redis:flush": "docker compose -f infrastructure/docker/docker-compose.yml exec redis redis-cli FLUSHALL",
+    "db:open": "npm run mongo",
+    "queue:open": "npm run redis",
+    "queue:clear": "npm run redis:flush",
     "lint": "eslint ."
   },
   "keywords": [],

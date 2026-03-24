@@ -10,7 +10,9 @@ type MongoQuery = {
 };
 
 export async function createEvent(event: CreateEventInput) {
-  await eventQueue.add("track-event", event);
+  await eventQueue.add("track-event", event, {
+    attempts: 5,
+  });
   return { status: "queued" };
 }
 

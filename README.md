@@ -1,12 +1,12 @@
 # 🚀 Analytics Platform
 
-A scalable **event-driven analytics platform** built with a microservices architecture, featuring asynchronous processing, GraphQL API, analytics aggregation, and clean service boundaries.
+A scalable **event-driven analytics platform** built with a microservices architecture, featuring asynchronous processing, **pre-aggregated analytics**, and **production-grade data consistency guarantees**.
 
 ---
 
 ## 🧠 Architecture Overview
 
-This project follows a **service-oriented architecture with OLTP + OLAP separation**:
+This project follows a **service-oriented architecture with OLTP + OLAP separation** and async processing:
 
 ```
 Frontend → Gateway (GraphQL)
@@ -20,7 +20,9 @@ Event Service        Analytics Service
         ↓
       Worker
         ↓
-     MongoDB
+ ┌───────────────┴────────────────┐
+ ↓                                ↓
+Raw Events (MongoDB)     Aggregates (MongoDB)
 ```
 
 ---
@@ -30,8 +32,8 @@ Event Service        Analytics Service
 ### 🟣 Gateway (`apps/gateway`)
 
 * GraphQL API (Apollo Server + Express)
-* Aggregates data from services
-* Does NOT access the database directly
+* Aggregates data from internal services
+* Does **NOT** access the database directly
 * Acts as a unified entry point
 * Exposes `/graphql` and `/health`
 
@@ -40,6 +42,7 @@ Event Service        Analytics Service
 ### 🔵 Event Service (`services/event-service`)
 
 * Receives incoming events via REST
+* Generates **eventId (idempotency key)**
 * Pushes events to a queue (Redis/BullMQ)
 * Supports querying raw events (`/events`)
 * Handles **write-heavy (OLTP)** workload
@@ -49,19 +52,24 @@ Event Service        Analytics Service
 
 ### 🟠 Analytics Service (`services/analytics-service`)
 
-* Handles aggregation queries (MongoDB aggregation pipeline)
-* Provides analytics endpoints (`/events/stats`)
+* Handles analytics queries
+* Reads from **pre-aggregated collections**
+* Falls back to Mongo aggregation pipeline if needed
 * Optimized for **read-heavy (OLAP)** workloads
-* Decoupled from event ingestion
-* Exposes `/health`
+* Exposes `/events/stats` and `/health`
 
 ---
 
 ### 🟢 Worker (`services/worker`)
 
 * Consumes jobs from the queue
-* Processes and persists events into MongoDB
-* Handles asynchronous event processing
+* Persists raw events into MongoDB
+* Updates **pre-aggregated analytics collections**
+* Guarantees:
+
+  * ✅ **Idempotency** (no duplicate processing)
+  * ✅ **Atomicity** (MongoDB transactions)
+  * ✅ **Consistency under retries**
 
 ---
 
@@ -84,20 +92,26 @@ Event Service        Analytics Service
 
 ### 🟡 `packages/models`
 
-* Shared Mongoose models
+* Shared Mongoose models:
+
+  * `EventModel` (raw events)
+  * `EventsByType`
+  * `EventsByUser`
+  * `EventsByDay`
+
 * Ensures schema consistency across services
 
 ---
 
 ## ⚙️ Tech Stack
 
-* **Node.js + TypeScript**
-* **GraphQL (Apollo Server)**
-* **Express**
-* **MongoDB (Mongoose)**
-* **Redis + BullMQ**
-* **Zod (validation + typing)**
-* **Vite (Frontend)**
+* Node.js + TypeScript
+* GraphQL (Apollo Server)
+* Express
+* MongoDB (Mongoose + Transactions)
+* Redis + BullMQ
+* Zod (validation + typing)
+* Vite (Frontend)
 
 ---
 
@@ -113,8 +127,6 @@ npm install
 
 ### 2. Setup environment variables
 
-Copy `.env.example` files:
-
 ```bash
 cp services/event-service/.env.example services/event-service/.env
 cp services/analytics-service/.env.example services/analytics-service/.env
@@ -124,35 +136,31 @@ cp apps/gateway/.env.example apps/gateway/.env
 
 ---
 
-### 3. Start infrastructure (MongoDB + Redis)
-
-Make sure Docker is running:
+### 3. One-command setup (recommended)
 
 ```bash
-npm run dev:infra
+npm run dev:setup
 ```
+
+This will:
+
+* Start MongoDB and Redis via Docker
+* Initialize and configure MongoDB replica set
+* Wait until MongoDB is PRIMARY
+* Start all services
 
 ---
 
-### 4. Run the application
+### 4. Manual setup (optional)
 
 ```bash
+npm run dev:infra
 npm run dev
 ```
-
-This will start:
-
-* Gateway → http://localhost:4000/graphql
-* Event Service → http://localhost:4001
-* Analytics Service → http://localhost:4002
-* Worker → background processing
-* Frontend → http://localhost:5173
 
 ---
 
 ## 📡 API Usage
-
----
 
 ### ➤ Send an event
 
@@ -162,6 +170,7 @@ POST http://localhost:4001/events
 
 ```json
 {
+  "eventId": "uuid",
   "type": "click",
   "userId": "123"
 }
@@ -190,7 +199,7 @@ query {
 
 ---
 
-### ➤ Query analytics (aggregation)
+### ➤ Query analytics (pre-aggregated)
 
 ```graphql
 query {
@@ -205,68 +214,73 @@ query {
 
 ---
 
-### ➤ Direct analytics API (optional)
-
-```http
-POST http://localhost:4002/events/stats
-```
-
-```json
-{
-  "groupBy": "TYPE"
-}
-```
-
----
-
-## 🧪 Health Checks
-
-Each service exposes a health endpoint:
-
-```text
-GET /health
-```
-
-Examples:
-
-```bash
-curl http://localhost:4001/health   # event-service
-curl http://localhost:4002/health   # analytics-service
-curl http://localhost:4000/health   # gateway
-```
-
----
-
 ## 🧠 Key Concepts
 
-### ✔ Separation of Concerns
+### ✔ OLTP vs OLAP Separation
 
-* Gateway → orchestration
-* Event Service → ingestion (OLTP)
-* Analytics Service → aggregation (OLAP)
-* Worker → async processing
+* **OLTP** → raw event ingestion (Event Service)
+* **OLAP** → analytics queries (Analytics Service)
 
 ---
 
 ### ✔ Asynchronous Processing
 
 * Events are queued using BullMQ
-* Worker processes and persists data
-* Decouples ingestion from database writes
+* Worker processes them in the background
+* Prevents API bottlenecks
 
 ---
 
-### ✔ Shared Contracts
+### ✔ Pre-Aggregation (Materialized Views)
 
-* Zod schemas ensure validation consistency
-* Shared types prevent mismatch between services
+* Aggregations are computed at **write-time**
+
+* Stored in collections:
+
+  * `events_by_type`
+  * `events_by_user`
+  * `events_by_day`
+* Enables **fast read queries**
 
 ---
 
-### ✔ Modular GraphQL Architecture
+### ✔ Idempotency (Exactly-Once Processing)
 
-* Schema split into modules (event / analytics)
-* Resolvers organized by domain
+* Each event has a unique `eventId`
+* Enforced via **unique index in MongoDB**
+* Duplicate jobs are safely ignored
+* Prevents double counting under retries
+
+---
+
+### ✔ Transactions (Atomic Writes)
+
+* Event insert + aggregation updates run in a **single transaction**
+* Guarantees:
+
+  * all succeed ✅
+  * or all rollback ✅
+
+---
+
+### ✔ Eventual Consistency
+
+* Analytics are updated asynchronously by the worker
+* Slight delay is expected, but data remains consistent
+
+---
+
+### ✔ Infrastructure Automation
+
+* Automated setup script (`dev:setup`)
+
+* Handles:
+
+  * container startup
+  * replica set initialization
+  * primary election readiness
+
+* Ensures **reproducible local environments**
 
 ---
 
@@ -287,33 +301,36 @@ analytics-platform/
 │   └── models/
 ├── infrastructure/
 │   └── docker/
+├── scripts/
+│   └── setup.js
 ```
 
 ---
 
 ## 🔥 Features
 
-* Event ingestion pipeline
-* Asynchronous job processing
+* Event-driven ingestion pipeline
+* Async processing with BullMQ
+* Pre-aggregated analytics (fast reads)
+* Idempotent processing (safe retries)
+* MongoDB transactions (strong consistency)
 * GraphQL API gateway
-* Analytics aggregation service
 * Cursor-based pagination
-* Schema validation (Zod)
 * Shared contracts across services
 * Health checks for all services
-* Clean microservices architecture
+* Automated development environment setup
 
 ---
 
 ## 🚧 Future Improvements
 
-* Pre-aggregated analytics (materialized views / Redis)
+* Redis caching layer for hot analytics queries
+* Batch aggregation (reduce write pressure)
 * Authentication & authorization
 * Rate limiting
-* Observability (logging, tracing, metrics)
-* GraphQL query complexity limits
-* Service-to-service messaging (Kafka / NATS)
-* Deployment (Docker Compose → Kubernetes)
+* Observability (metrics, tracing, logs)
+* Kafka / NATS for event streaming
+* Deployment (Docker → Kubernetes)
 
 ---
 

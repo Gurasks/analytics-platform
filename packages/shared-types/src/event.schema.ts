@@ -2,6 +2,7 @@ import { z } from "zod";
 import mongoose from "mongoose";
 
 export const createEventSchema = z.object({
+  eventId: z.string(),
   type: z.string(),
   userId: z.string(),
 });
