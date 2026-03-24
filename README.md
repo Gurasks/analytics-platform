@@ -99,8 +99,6 @@ Raw Events (MongoDB)     Aggregates (MongoDB)
   * `EventsByUser`
   * `EventsByDay`
 
-* Ensures schema consistency across services
-
 ---
 
 ## ⚙️ Tech Stack
@@ -148,15 +146,6 @@ This will:
 * Initialize and configure MongoDB replica set
 * Wait until MongoDB is PRIMARY
 * Start all services
-
----
-
-### 4. Manual setup (optional)
-
-```bash
-npm run dev:infra
-npm run dev
-```
 
 ---
 
@@ -214,6 +203,65 @@ query {
 
 ---
 
+## 🌱 Seeding & Testing
+
+This project includes a powerful **seed script** to simulate real traffic and validate system behavior.
+
+---
+
+### ➤ Run seed script
+
+```bash
+npm run seed
+```
+
+---
+
+### ➤ Custom seed (size + concurrency)
+
+```bash
+npm run seed -- 500 20
+```
+
+---
+
+### ⚡ Stress test
+
+```bash
+npm run seed -- 5000 50 stress
+```
+
+* Simulates high throughput
+* Tests queue + worker scalability
+
+---
+
+### 🧪 Duplicate test (idempotency)
+
+```bash
+npm run seed -- 50 5 duplicate
+```
+
+Expected result:
+
+```txt
+events = 1
+aggregates = 1
+```
+
+---
+
+### ⏳ Time-based analytics test
+
+```bash
+npm run seed -- 200 10 time
+```
+
+* Generates events across multiple days
+* Validates `events_by_day` aggregation
+
+---
+
 ## 🧠 Key Concepts
 
 ### ✔ OLTP vs OLAP Separation
@@ -225,22 +273,23 @@ query {
 
 ### ✔ Asynchronous Processing
 
-* Events are queued using BullMQ
-* Worker processes them in the background
-* Prevents API bottlenecks
+* Events are queued (BullMQ)
+* Worker processes asynchronously
+* Improves scalability
 
 ---
 
-### ✔ Pre-Aggregation (Materialized Views)
+### ✔ Pre-Aggregation
 
-* Aggregations are computed at **write-time**
+* Aggregations computed at write-time
 
-* Stored in collections:
+* Stored in:
 
-  * `events_by_type`
-  * `events_by_user`
-  * `events_by_day`
-* Enables **fast read queries**
+  * `eventsbytypes`
+  * `eventsbyusers`
+  * `eventsbydays`
+
+* Enables fast reads
 
 ---
 
@@ -303,6 +352,7 @@ analytics-platform/
 │   └── docker/
 ├── scripts/
 │   └── setup.js
+│   └── seed.js
 ```
 
 ---
@@ -319,6 +369,7 @@ analytics-platform/
 * Shared contracts across services
 * Health checks for all services
 * Automated development environment setup
+* Advanced seed + testing system
 
 ---
 

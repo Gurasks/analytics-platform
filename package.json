@@ -21,6 +21,7 @@
     "dev:infra": "docker-compose -f infrastructure/docker/docker-compose.yml up -d",
     "dev:stop": "docker-compose -f infrastructure/docker/docker-compose.yml down",
     "dev:setup": "node scripts/setup.js",
+    "seed": "node scripts/seed.js",
     "mongo": "docker compose -f infrastructure/docker/docker-compose.yml exec mongodb mongosh",
     "redis": "docker compose -f infrastructure/docker/docker-compose.yml exec redis redis-cli",
     "redis:flush": "docker compose -f infrastructure/docker/docker-compose.yml exec redis redis-cli FLUSHALL",
@@ -37,5 +38,8 @@
     "@typescript-eslint/parser": "^8.57.1",
     "concurrently": "^9.2.1",
     "eslint": "^10.0.3"
+  },
+  "dependencies": {
+    "axios": "^1.13.6"
   }
 }
