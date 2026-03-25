@@ -6,7 +6,7 @@ A scalable **event-driven analytics platform** built with a microservices archit
 
 ## 🧠 Architecture Overview
 
-This project follows a **service-oriented architecture with OLTP + OLAP separation** and async processing:
+This project follows a **microservices-based, event-driven architecture** with OLTP + OLAP separation and async processing:
 
 ```
 Frontend → Gateway (GraphQL)
@@ -43,7 +43,7 @@ Raw Events (MongoDB)     Aggregates (MongoDB)
 
 * Receives incoming events via REST
 * Generates **eventId (idempotency key)**
-* Pushes events to a queue (Redis/BullMQ)
+* Publishes events to a queue enabling an **event-driven pipeline**
 * Supports querying raw events (`/events`)
 * Handles **write-heavy (OLTP)** workload
 * Exposes `/health`
@@ -110,6 +110,7 @@ Raw Events (MongoDB)     Aggregates (MongoDB)
 * Redis + BullMQ
 * Zod (validation + typing)
 * Vite (Frontend)
+* Docker (local environment)
 
 ---
 
@@ -143,8 +144,8 @@ npm run dev:setup
 This will:
 
 * Start MongoDB and Redis via Docker
-* Initialize and configure MongoDB replica set
-* Wait until MongoDB is PRIMARY
+* Initialize MongoDB replica set
+* Wait for PRIMARY election
 * Start all services
 
 ---
@@ -205,10 +206,6 @@ query {
 
 ## 🌱 Seeding & Testing
 
-This project includes a powerful **seed script** to simulate real traffic and validate system behavior.
-
----
-
 ### ➤ Run seed script
 
 ```bash
@@ -217,7 +214,7 @@ npm run seed
 
 ---
 
-### ➤ Custom seed (size + concurrency)
+### ➤ Custom seed
 
 ```bash
 npm run seed -- 500 20
@@ -232,7 +229,7 @@ npm run seed -- 5000 50 stress
 ```
 
 * Simulates high throughput
-* Tests queue + worker scalability
+* Validates queue + worker scalability
 
 ---
 
@@ -244,92 +241,102 @@ npm run seed -- 50 5 duplicate
 
 Expected result:
 
-```txt
+```
 events = 1
 aggregates = 1
 ```
 
 ---
 
-### ⏳ Time-based analytics test
+### ⏳ Time-based test
 
 ```bash
 npm run seed -- 200 10 time
 ```
 
-* Generates events across multiple days
-* Validates `events_by_day` aggregation
-
 ---
 
 ## 🧠 Key Concepts
 
+### ✔ Event-Driven Architecture
+
+* Services communicate asynchronously via queue
+* Decouples ingestion from processing
+* Enables scalability and resilience
+
+---
+
 ### ✔ OLTP vs OLAP Separation
 
-* **OLTP** → raw event ingestion (Event Service)
-* **OLAP** → analytics queries (Analytics Service)
+* **OLTP** → ingestion (Event Service)
+* **OLAP** → analytics (Analytics Service)
 
 ---
 
 ### ✔ Asynchronous Processing
 
-* Events are queued (BullMQ)
-* Worker processes asynchronously
-* Improves scalability
+* Queue-based processing with workers
+* Improves throughput and responsiveness
 
 ---
 
 ### ✔ Pre-Aggregation
 
 * Aggregations computed at write-time
-
-* Stored in:
-
-  * `eventsbytypes`
-  * `eventsbyusers`
-  * `eventsbydays`
-
-* Enables fast reads
+* Enables fast analytics queries
 
 ---
 
-### ✔ Idempotency (Exactly-Once Processing)
+### ✔ Idempotency
 
-* Each event has a unique `eventId`
-* Enforced via **unique index in MongoDB**
-* Duplicate jobs are safely ignored
-* Prevents double counting under retries
+* Unique `eventId` ensures duplicate-safe processing
+* Prevents double counting
 
 ---
 
-### ✔ Transactions (Atomic Writes)
+### ✔ Transactions
 
-* Event insert + aggregation updates run in a **single transaction**
-* Guarantees:
-
-  * all succeed ✅
-  * or all rollback ✅
+* Atomic writes across collections
+* Ensures consistency
 
 ---
 
 ### ✔ Eventual Consistency
 
-* Analytics are updated asynchronously by the worker
-* Slight delay is expected, but data remains consistent
+* Analytics updated asynchronously
+* Slight delay accepted for scalability
+
+---
+
+### ✔ Scalability
+
+* Horizontal worker scaling
+* Queue-based load leveling
+* Read optimization via pre-aggregation
+* Decoupled services for independent scaling
+
+---
+
+### ✔ Fault Tolerance
+
+* Retry mechanism for failed jobs
+* Safe reprocessing via idempotency
+* Consistent behavior under failures
+
+---
+
+### ✔ API Design
+
+* REST APIs for ingestion and analytics
+* GraphQL gateway for flexible queries
+* Clear separation of read/write responsibilities
 
 ---
 
 ### ✔ Infrastructure Automation
 
-* Automated setup script (`dev:setup`)
-
-* Handles:
-
-  * container startup
-  * replica set initialization
-  * primary election readiness
-
-* Ensures **reproducible local environments**
+* Automated setup via `dev:setup`
+* Ensures reproducible local environments
 
 ---
 
@@ -351,7 +358,7 @@ analytics-platform/
 ├── infrastructure/
 │   └── docker/
 ├── scripts/
-│   └── setup.js
+│   ├── setup.js
 │   └── seed.js
 ```
 
@@ -361,27 +368,35 @@ analytics-platform/
 
 * Event-driven ingestion pipeline
 * Async processing with BullMQ
-* Pre-aggregated analytics (fast reads)
-* Idempotent processing (safe retries)
-* MongoDB transactions (strong consistency)
+* Pre-aggregated analytics
+* Idempotent processing
+* MongoDB transactions
 * GraphQL API gateway
 * Cursor-based pagination
 * Shared contracts across services
-* Health checks for all services
-* Automated development environment setup
-* Advanced seed + testing system
+* Health checks
+* Automated dev environment
+* Advanced seed testing
 
 ---
 
 ## 🚧 Future Improvements
 
-* Redis caching layer for hot analytics queries
-* Batch aggregation (reduce write pressure)
+* Redis caching layer
+* Batch aggregation
 * Authentication & authorization
 * Rate limiting
 * Observability (metrics, tracing, logs)
-* Kafka / NATS for event streaming
-* Deployment (Docker → Kubernetes)
+* Kafka / NATS integration for event streaming
+* Deployment with Kubernetes
+
+---
+
+## 🔄 Event Streaming Evolution
+
+* Current: BullMQ (Redis)
+* Future: Kafka / NATS
+* Same event-driven principles apply (producers/consumers, retries, idempotency)
 
 ---
 
