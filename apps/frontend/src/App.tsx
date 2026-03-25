@@ -1,12 +1,7 @@
-import { StatsList } from "./modules/analytics/components/stats-list";
+import { Dashboard } from "./modules/analytics/components/dashboard";
 
 function App() {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <StatsList />
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default App;
