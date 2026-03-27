@@ -1,4 +1,6 @@
+import { Select } from "@/shared/ui/select/select";
 import type { EventGroupBy } from "../types/event.type";
+import { DatePicker } from "@/shared/ui/date-picker/date-picker";
 
 type FilterProps = {
   groupBy: EventGroupBy;
@@ -18,24 +20,19 @@ export function Filters({
   setToDate
 }: FilterProps) {
   return (
-    <div style={{ marginBottom: 20 }}>
-      <label>Group By: </label>
-
-      <select
+    <div className="flex flex-wrap gap-4 items-center">
+      <Select
         value={groupBy}
-        onChange={(e) =>
-          setGroupBy(e.target.value as EventGroupBy)
-        }
-      >
-        <option value="TYPE">Type</option>
-        <option value="USER">User</option>
-        <option value="DAY">Day</option>
-      </select>
+        onChange={(val) => setGroupBy(val as EventGroupBy)}
+        options={[
+          { label: "Type", value: "TYPE" },
+          { label: "User", value: "USER" },
+          { label: "Day", value: "DAY" },
+        ]}
+      />
 
-      <label>Date: </label>
-
-      <input value={fromDate} onChange={(e) => setFromDate(e.target.value)} type="date" />
-      <input value={toDate} onChange={(e) => setToDate(e.target.value)} type="date" />
+      <DatePicker value={fromDate} onChange={setFromDate} />
+      <DatePicker value={toDate} onChange={setToDate} />
     </div>
   );
 }

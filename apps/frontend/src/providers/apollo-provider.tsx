@@ -8,6 +8,10 @@ import { ApolloProvider } from "@apollo/client/react";
 
 import { config } from "@/config";
 
+type ApolloProviderWrapperProps = {
+  children: React.ReactNode;
+};
+
 const httpLink = new HttpLink({
   uri: config.viteGraphqlUrl,
 });
@@ -30,6 +34,6 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function ApolloProviderWrapper({ children }: ApolloProviderWrapperProps) {
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
 }

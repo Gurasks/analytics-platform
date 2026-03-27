@@ -1,0 +1,56 @@
+.rdp {
+  --rdp-accent-color: var(--accent-color) !important;
+  --rdp-accent-background-color: var(--accent-color) !important;
+  --rdp-outline: var(--border-color);
+}
+
+.rdp-selected .rdp-day_button {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  border-radius: 9999px;
+  border: 1px solid var(--accent-color);
+}
+
+.rdp-selected .rdp-day_button:hover {
+  background-color: var(--accent-hover) !important;
+}
+
+.rdp-today .rdp-day_button {
+  color: var(--accent-color) !important;
+  background: transparent !important;
+  font-weight: 500;
+}
+
+.rdp-day_button:hover {
+  background-color: var(--bg-secondary-hover);
+}
+
+.rdp-button_previous,
+.rdp-button_next {
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rdp-button_previous svg,
+.rdp-button_next svg {
+  fill: var(--text-secondary);
+  width: 16px;
+  height: 16px;
+}
+
+.rdp-button_previous:hover,
+.rdp-button_next:hover {
+  background: var(--bg-secondary-hover);
+}
+
+.rdp-button_previous:hover svg,
+.rdp-button_next:hover svg {
+  fill: var(--text-primary);
+}
