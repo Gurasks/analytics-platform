@@ -10,6 +10,13 @@ export async function getEventStats(input: EventStatsInput) {
     if (input.to) match.createdAt.$lte = new Date(input.to);
   }
 
+  if (input.search && input.groupBy === "USER") {
+    match.userId = {
+      $regex: input.search,
+      $options: "i",
+    };
+  }
+
   let groupId;
 
   switch (input.groupBy) {

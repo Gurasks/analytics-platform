@@ -6,11 +6,13 @@ import "./calendar-theme.css";
 
 type DatePickerProps = {
   value: string;
+  label?: string;
   onChange: (value: string) => void;
 };
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DatePicker({ value, label, onChange }: DatePickerProps) {
   const selectedDate = value ? new Date(value) : undefined;
+  const displayLabel = label ?? "Select date";
 
   return (
     <Popover className="relative">
@@ -25,7 +27,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           cursor-pointer
         "
       >
-        {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Select date"}
+        {selectedDate ? format(selectedDate, "dd/MM/yyyy") : displayLabel}
       </PopoverButton>
 
       <PopoverPanel

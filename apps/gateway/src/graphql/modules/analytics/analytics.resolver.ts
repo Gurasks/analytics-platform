@@ -1,11 +1,16 @@
 import axios from "axios";
+import { z } from "zod";
 import { GraphQLError } from "graphql";
 import { eventStatSchema } from "@analytics/shared-types";
 import { config } from "../../../config";
 
+type EventStatsArgs = {
+  input: z.infer<typeof eventStatSchema>;
+};
+
 export const analyticsResolvers = {
   Query: {
-    eventStats: async (_: any, { input }) => {
+    eventStats: async (_: unknown, { input }: EventStatsArgs) => {
       let parsed;
 
       try {

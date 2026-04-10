@@ -7,9 +7,15 @@ type UseGetStatsProps = {
   groupBy: EventGroupBy;
   fromDate?: string;
   toDate?: string;
+  search?: string;
 };
 
-export function useGetStats({ groupBy, fromDate, toDate }: UseGetStatsProps) {
+export function useGetStats({
+  groupBy,
+  fromDate,
+  toDate,
+  search,
+}: UseGetStatsProps) {
   return useQuery<GetStatsResponse>(GET_STATS, {
     fetchPolicy: "network-only",
     pollInterval: 3000, // TODO: change to realtime with WebSockets or GraphQL Subscriptions
@@ -19,6 +25,7 @@ export function useGetStats({ groupBy, fromDate, toDate }: UseGetStatsProps) {
         groupBy,
         ...(fromDate && { from: fromDate }),
         ...(toDate && { to: toDate }),
+        ...(search && { search }),
       },
     },
   });

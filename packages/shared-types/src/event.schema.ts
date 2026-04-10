@@ -15,6 +15,7 @@ export const eventStatSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
   groupBy: z.enum(["TYPE", "USER", "DAY"]),
+  search: z.string().optional(),
 });
 
 export const getEventsSchema = z.object({

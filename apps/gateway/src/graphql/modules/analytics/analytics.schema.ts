@@ -7,6 +7,7 @@ export const analyticsTypeDefs = `#graphql
     from: String
     to: String
     groupBy: EventGroupBy!
+    search: String
   }
 
   enum EventGroupBy {
