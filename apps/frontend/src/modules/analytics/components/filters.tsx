@@ -1,9 +1,10 @@
-import { Select } from "@/shared/ui/select/select";
-import type { EventGroupBy } from "../types/event.type";
 import { DatePicker } from "@/shared/ui/date-picker/date-picker";
 import { SearchCombobox } from "@/shared/ui/search-combobox/search-combobox";
+import { Select } from "@/shared/ui/select/select";
 import type { GetStatsResponse } from "@analytics/shared-types";
+import { format } from "date-fns";
 import { useMemo } from "react";
+import type { EventGroupBy } from "../types/event.type";
 
 type FilterProps = {
   groupBy: EventGroupBy;
@@ -14,7 +15,6 @@ type FilterProps = {
   setToDate: (value: string) => void;
   search: string;
   setSearch: (value: string) => void;
-  setActiveSearch: (value: string) => void;
   data?: GetStatsResponse | undefined;
   onClear: () => void;
 };
@@ -28,7 +28,6 @@ export function Filters({
   setToDate,
   search,
   setSearch,
-  setActiveSearch,
   data,
   onClear
 }: FilterProps) {
@@ -39,9 +38,11 @@ export function Filters({
 
   const hasFilters =
     groupBy !== "TYPE" ||
-    fromDate ||
-    toDate ||
-    search;
+    !!fromDate ||
+    !!toDate ||
+    !!search;
+
+  const today = format(new Date(), "yyyy-MM-dd");
 
   return (
     <div className="flex flex-wrap gap-4 items-center transition-all duration-200">
@@ -55,15 +56,25 @@ export function Filters({
         ]}
       />
 
-      <DatePicker value={fromDate} onChange={setFromDate} label={"Select From Date"} />
-      <DatePicker value={toDate} onChange={setToDate} label={"Select To Date"} />
+      <DatePicker
+        value={fromDate}
+        onChange={setFromDate}
+        label="Select From Date"
+        maxDate={toDate || today}
+      />
+      <DatePicker
+        value={toDate}
+        onChange={setToDate}
+        label="Select To Date"
+        minDate={fromDate}
+        maxDate={today}
+      />
       {groupBy === "USER" && (
         <SearchCombobox
           value={search}
           onChange={setSearch}
           onSubmit={(value) => {
             setSearch(value);
-            setActiveSearch(value);
           }}
           options={options}
         />

@@ -1,32 +1,31 @@
 import { useSearchParams } from "react-router-dom";
+import { useCallback, useMemo } from "react";
 
 export function useQueryState<T extends string>(
   key: string,
   defaultValue: T,
-  allowedValues?: readonly T[],
-) {
-  const [params, setParams] = useSearchParams();
+): [T, (val: T) => void] {
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const raw = params.get(key);
+  const value = useMemo(() => {
+    const param = searchParams.get(key);
+    return (param as T) || defaultValue;
+  }, [searchParams, key, defaultValue]);
 
-  let value = defaultValue;
+  const setValue = useCallback(
+    (val: T) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (!val || val === defaultValue) {
+          next.delete(key);
+        } else {
+          next.set(key, val);
+        }
+        return next;
+      });
+    },
+    [key, defaultValue, setSearchParams],
+  );
 
-  if (raw) {
-    if (!allowedValues || allowedValues.includes(raw as T)) {
-      value = raw as T;
-    }
-  }
-
-  const setValue = (val: T) => {
-    setParams((prev) => {
-      const next = new URLSearchParams(prev);
-
-      if (val) next.set(key, val);
-      else next.delete(key);
-
-      return next;
-    });
-  };
-
-  return [value, setValue] as const;
+  return [value, setValue];
 }

@@ -26,7 +26,6 @@ export function VisxLineChart({ data }: Props) {
   const width = Math.max(data.length * 80, 600);
   const height = 300;
 
-
   const xScale = scalePoint({
     domain: data.map((d) => d.key),
     range: [0, width],

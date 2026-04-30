@@ -1,46 +1,51 @@
 import { EventsChart } from "@/modules/analytics/components/events-chart";
 import { useDebounce } from "@/shared/hooks/use-debounce";
-import { useQueryState } from "@/shared/hooks/use-query-params";
 import { ThemeToggle } from "@/shared/ui/theme-toggle/theme-toggle";
-import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { QUERY_KEYS } from "../constants/query-keys";
 import { useGetStats } from "../hooks/use-get-stats";
-import { EVENT_GROUP_BY, type EventGroupBy } from "../types/event.type";
+import { type EventGroupBy } from "../types/event.type";
 import { Filters } from "./filters";
 import { StatsCards } from "./stats-cards";
+import { useQueryState } from "@/shared/hooks/use-query-params";
 
 export function Dashboard() {
+  const [, setSearchParams] = useSearchParams();
+
   const [groupBy, setGroupBy] = useQueryState<EventGroupBy>(
     QUERY_KEYS.groupBy,
-    "TYPE",
-    EVENT_GROUP_BY
+    "TYPE"
   );
-  const [fromDate, setFromDate] = useQueryState<string>(QUERY_KEYS.from, "");
-  const [toDate, setToDate] = useQueryState<string>(QUERY_KEYS.to, "");
-  const [search, setSearch] = useQueryState<string>(QUERY_KEYS.search, "");
-  const [_params, setParams] = useSearchParams();
-  const [activeSearch, setActiveSearch] = useState(search);
-  const debouncedSearch = useDebounce(search, 1000);
+  const [fromDate, setFromDate] = useQueryState<string>(
+    QUERY_KEYS.from,
+    ""
+  );
+  const [toDate, setToDate] = useQueryState<string>(
+    QUERY_KEYS.to,
+    ""
+  );
+  const [search, setSearch] = useQueryState<string>(
+    QUERY_KEYS.search,
+    ""
+  );
 
-  useEffect(() => {
-    setActiveSearch(debouncedSearch);
-  }, [debouncedSearch]);
+  // Single source of truth + debounce
+  const debouncedSearch = useDebounce(search, 400);
 
   const { data, loading, error } = useGetStats({
     groupBy,
     fromDate,
     toDate,
-    search: activeSearch,
+    search: debouncedSearch,
   });
 
   if (!data && loading) return <p>Loading...</p>;
   if (error) return <p>Error</p>;
 
   const clearFilters = () => {
-    setParams({ groupBy: "TYPE" });
-    setActiveSearch("");
-    setSearch("");
+    setSearchParams({
+      [QUERY_KEYS.groupBy]: "TYPE",
+    });
   };
 
   return (
@@ -61,7 +66,6 @@ export function Dashboard() {
             setToDate={setToDate}
             search={search}
             setSearch={setSearch}
-            setActiveSearch={setActiveSearch}
             data={data}
             onClear={clearFilters}
           />
@@ -70,7 +74,9 @@ export function Dashboard() {
         <StatsCards data={data} />
 
         <div className="mt-6 bg-card rounded-2xl p-6 shadow-lg border border-theme">
-          <h2 className="text-lg font-semibold mb-4 text-primary">Events</h2>
+          <h2 className="text-lg font-semibold mb-4 text-primary">
+            Events
+          </h2>
           <EventsChart data={data} groupBy={groupBy} />
         </div>
       </div>
